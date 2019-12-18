@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer")
+const consoleTable = require('console.table');
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -25,7 +26,7 @@ function start() {
             name: "action",
             choices: ["View all employees", "View All employees by department", "Add employee", "Remove employee", "Update role", "Update manager"]
         }).then(
-            function(action) {
+            function({ action }) {
                 switch (action) {
                     case "View all employees":
                         viewAllEmployees()
@@ -56,16 +57,38 @@ function start() {
 };
 
 function viewAllEmployees() {
-    var query = "SELECT * FROM employee";
+    const query = "SELECT * FROM employee INNER JOIN employee_role INNER JOIN department";
     connection.query(query, function(err, res) {
         if (err) throw err
         for (i = 0; i < res.length; i++) {
             console.table(res[i])
         }
-        start();
+        start()
     })
 };
 
 function viewByDepartment() {
-    const query = "SELECT * FROM employee GROUP BY department_id"
-}
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err
+        var departmentChoices = [];
+        for (i = 0; i < res.length; i++) {
+            departmentChoices.push(res[i].name)
+        }
+        inquirer.prompt([{
+                type: "list",
+                name: "department",
+                message: "Select a department to view employees",
+                choices: departmentChoices
+            }])
+            .then(function({ department }) {
+                var query = ""
+                connection.query(query, [department], function(err, res) {
+                    if (err) throw err
+                    for (i = 0; i < res.length; i++) {
+                        console.table(res[i])
+                    }
+                    start();
+                })
+            })
+    })
+};

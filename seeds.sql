@@ -15,9 +15,9 @@ SELECT
   *
 FROM employee;
 USE employeeTrackerDB;
-INSERT INTO employee (first_name, last_name, role_id)
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES
-  ("Jane", "Doe", 4),
-  ("John", "Smith", 1),
-  ("Sam", "Pott", 2),
-  ("Brian", "Johnson", 3);
+  ("Jane", "Doe", 4, 1),
+  ("John", "Smith", 1, null),
+  ("Sam", "Pott", 2, 1),
+  ("Brian", "Johnson", 3, 1);

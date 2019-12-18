@@ -8,6 +8,7 @@ CREATE TABLE department(
   PRIMARY KEY (id)
 );
 --
+--
 CREATE TABLE employee_role(
   id INT NOT NULL AUTO_INCREMENT,
   title VARCHAR(30),
@@ -16,6 +17,7 @@ CREATE TABLE employee_role(
   FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 );
+--
 --
 CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT,
