@@ -24,14 +24,14 @@ function start() {
             type: "list",
             message: "Would you like to do?",
             name: "action",
-            choices: ["View all employees", "View All employees by department", "Add employee", "Remove employee", "Update role", "Update manager"]
+            choices: ["View all employees", "View all employees by department", "Add employee", "Remove employee", "Update role", "Exit"]
         }).then(
             function({ action }) {
                 switch (action) {
                     case "View all employees":
                         viewAllEmployees()
                         break;
-                    case "View All employees by department":
+                    case "View all employees by department":
                         //
                         viewByDepartment()
                         break;
@@ -47,11 +47,8 @@ function start() {
                         //
                         updateRole()
                         break;
-                        // case "Update manager":
-                        //     //
-                        //     updateManager()
-                        //     break;
                     case "Exit":
+                        //
                         connection.end();
                         break;
                 }
@@ -97,23 +94,21 @@ function viewByDepartment() {
 };
 
 function addEmployee() {
-    connection.query("select title from employee_role", function(err, res) {
+    connection.query("SELECT title from employee_role", function(err, res) {
         if (err) throw err
         var title = [];
-        for (j = 0; j < res.length; j++) {
-            title.push(res[j].title)
+        for (i = 0; i < res.length; i++) {
+            title.push(res[i].title)
         }
-        connection.query("select first_name, last_name from employee", function(err, res) {
+        connection.query("SELECT first_name, last_name from employee", function(err, res) {
             var managerName = ["none"]
             if (err) throw err
-            for (k = 0; k < res.length; k++) {
-                var firstname = res[k].first_name;
-                var lastname = res[k].last_name
-                console.table(firstname + lastname)
+            for (i = 0; i < res.length; i++) {
+                var firstname = res[i].first_name;
+                var lastname = res[i].last_name
+                console.table(firstname + " " + lastname)
                 managerName.push(firstname + " " + lastname)
             }
-            console.table(title)
-            console.table(managerName)
             inquirer.prompt([{
                         type: "input",
                         name: "firstName",
@@ -138,29 +133,24 @@ function addEmployee() {
                     }
                 ])
                 .then(function({ firstName, lastName, title, manager }) {
-                    console.table(manager)
-                    connection.query("Select id from employee_role where title = ?", [title], function(err, res) {
+                    connection.query("SELECT id FROM employee_role WHERE title = ?", [title], function(err, res) {
                         if (err) throw err;
                         var roleId = res[0].id;
                         var managerId;
                         if (manager === "none") {
                             managerId = null
-                            connection.query("Insert into employee(first_name, last_name, role_id, manager_id) values(?, ?, ?, ?)", [firstName, lastName, roleId, managerId], function(err, res) {
+                            connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) values(?, ?, ?, ?)", [firstName, lastName, roleId, managerId], function(err, res) {
                                 if (err) throw err;
                                 console.table(res);
                                 start();
                             })
                         } else {
                             var managersName = manager.split(" ");
-                            connection.query("Select id from employee where (first_name = ? and last_name = ?)", [managersName[0], managersName[1]], function(err, res) {
+                            connection.query("SELECT id FROM employee WHERE (first_name = ? and last_name = ?)", [managersName[0], managersName[1]], function(err, res) {
                                 if (err) throw err;
                                 console.table(res[0].id)
                                 managerId = res[0].id;
-                                console.table(firstName);
-                                console.table(lastName);
-                                console.table(roleId);
-                                console.table(managerId);
-                                connection.query("Insert into employee(first_name, last_name, role_id, manager_id) values(?, ?, ?, ?)", [firstName, lastName, roleId, managerId], function(err, res) {
+                                connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) values(?, ?, ?, ?)", [firstName, lastName, roleId, managerId], function(err, res) {
                                     if (err) throw err;
                                     console.table(res);
                                     start();
@@ -174,12 +164,12 @@ function addEmployee() {
 };
 
 function removeEmployee() {
-    connection.query("select first_name, last_name from employee", function(err, res) {
+    connection.query("SELECT first_name, last_name from employee", function(err, res) {
         var name = []
         if (err) throw err
-        for (k = 0; k < res.length; k++) {
-            var firstname = res[k].first_name;
-            var lastname = res[k].last_name
+        for (i = 0; i < res.length; i++) {
+            var firstname = res[i].first_name;
+            var lastname = res[i].last_name
             console.table(firstname + lastname)
             name.push(firstname + " " + lastname)
         }
@@ -192,10 +182,10 @@ function removeEmployee() {
             }])
             .then(function({ employee }) {
                 var selectedName = employee.split(" ");
-                connection.query("select id from employee where (first_name = ? and last_name = ?)", [selectedName[0], selectedName[1]], function(err, res) {
+                connection.query("SELECT id FROM employee WHERE (first_name = ? and last_name = ?)", [selectedName[0], selectedName[1]], function(err, res) {
                     if (err) throw err
                     console.table(res[0].id)
-                    connection.query("delete from employee where id = ?", [res[0].id], function(err, res) {
+                    connection.query("DELETE FROM employee where id = ?", [res[0].id], function(err, res) {
                         if (err) throw err
                         console.table(res);
                         start();
@@ -206,26 +196,25 @@ function removeEmployee() {
 }
 
 function updateRole() {
-    connection.query("select title from employee_role", function(err, res) {
+    connection.query("SELECT title FROM employee_role", function(err, res) {
         if (err) throw err
         var role = []
-        var employee2 = []
+        var employee = []
         for (i = 0; i < res.length; i++) {
             role.push(res[i].title)
         }
-        connection.query("select first_name, last_name from employee", function(err, res) {
+        connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
             if (err) throw err
-            for (j = 0; j < res.length; j++) {
-                var firstname = res[j].first_name;
-                var lastname = res[j].last_name
-                console.table(firstname + lastname)
-                employee2.push(firstname + " " + lastname)
+            for (i = 0; i < res.length; i++) {
+                var firstname = res[i].first_name;
+                var lastname = res[i].last_name
+                employee.push(firstname + " " + lastname)
             }
             inquirer.prompt([{
                         type: "list",
-                        name: "pickedEmployee",
+                        name: "selectedEmployee",
                         message: "Choose an employee to update their role",
-                        choices: employee2
+                        choices: employee
                     },
                     {
                         type: "list",
@@ -234,14 +223,15 @@ function updateRole() {
                         choices: role
                     }
                 ])
-                .then(function({ pickedEmployee, newRole }) {
-                    connection.query("select id from employee_role where title = ?", [newRole], function(err, res) {
+                .then(function({ selectedEmployee, newRole }) {
+                    connection.query("SELECT id FROM employee_role WHERE title = ?", [newRole], function(err, res) {
                         if (err) throw err
                         var roleId = res[0].id
-                        var name = pickedEmployee.split(" ")
-                        connection.query("update employee set role_id = ? where first_name = ? and last_name = ?", [roleId, name[0], name[1]], function(err, res) {
+                        var name = selectedEmployee.split(" ")
+                        connection.query("UPDATE employee SET role_id = ? WHERE first_name = ? and last_name = ?", [roleId, name[0], name[1]], function(err, res) {
                             if (err) throw err
                             console.table(res)
+                            start()
                         })
                     })
                 })
